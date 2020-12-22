@@ -4,7 +4,7 @@ pipeline {
         PROJECT = "sample-java"
         IMAGE = "$PROJECT:$VERSION"
         ECRURL = "https://683294139580.dkr.ecr.us-east-1.amazonaws.com/sample-java"
-        ECRCRED = "ecr:us-east-1:aws_credentials"
+        ECRCRED = "ecr:us-east-1:aws_ecr_cred"
     }
        
     agent any
