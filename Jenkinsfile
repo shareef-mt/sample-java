@@ -4,7 +4,7 @@ pipeline {
         PROJECT = "sample-java"
         IMAGE = "$PROJECT:$VERSION"
         ECRURL = "https://683294139580.dkr.ecr.us-east-1.amazonaws.com/sample-java"
-        ECRCRED = "ecr:us-east-1:aws_ecr_cred"
+        ECRCRED = "ecr:us-east-1:aws_credentials"
     }
        
     agent any
@@ -34,22 +34,7 @@ pipeline {
             steps {
                 sh 'mvn -B -DskipTests clean package -e'
             }
-        }
-		
-        stage('Aws Ecr Repo Creation') {
-            steps {
-                dir("ecr/") {
-                    script {
-                        sh 'pwd'
-                        sh 'terraform init'
-                        sh 'terraform plan'
-                        sh 'terraform apply --auto-approve'
-                           
-                    }
-                }
-            }
-        }
-       
+        }	
         stage('Docker Image Build') {
             steps {
             sh '''
@@ -63,7 +48,19 @@ pipeline {
                 }
             }
         }
-		
+	stage('Aws Ecr Repo Creation') {
+            steps {
+                dir("ecr/") {
+                    script {
+                        sh 'pwd'
+                        sh 'terraform init'
+                        sh 'terraform plan'
+                        sh 'terraform apply --auto-approve'
+                           
+                    }
+                }
+            }
+        }	
         stage('Scanning & Pushing Docker Image into Aws Repo') {
             steps {
                 script {
