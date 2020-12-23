@@ -10,7 +10,7 @@ pipeline {
     agent any
     tools {
         maven 'maven'
-	      terraform 'terraform'
+	terraform 'terraform'
     }
 	
     stages {
@@ -82,5 +82,10 @@ pipeline {
                 }
             }
         }
+	post {
+	    always {
+		cleanWS()
+	    }
+	}
     }  
     }
