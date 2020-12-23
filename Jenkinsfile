@@ -10,7 +10,7 @@ pipeline {
     agent any
     tools {
         maven 'maven'
-	terraform 'terraform'
+	      terraform 'terraform'
     }
 	
     stages {
@@ -34,7 +34,6 @@ pipeline {
             steps {
                 sh 'mvn -B -DskipTests clean package -e'
             }
-        }       
         stage('Docker Image Build') {
             steps {
             sh '''
@@ -48,7 +47,7 @@ pipeline {
                 }
             }
         }
-	stage('Aws Ecr Repo Creation') {
+	      stage('Aws Ecr Repo Creation') {
             steps {
                 dir("ecr/") {
                     script {
