@@ -34,22 +34,7 @@ pipeline {
             steps {
                 sh 'mvn -B -DskipTests clean package -e'
             }
-        }
-		
-        stage('Aws Ecr Repo Creation') {
-            steps {
-                dir("ecr/") {
-                    script {
-                        sh 'pwd'
-                        sh 'terraform init'
-                        sh 'terraform plan'
-                        sh 'terraform apply --auto-approve'
-                           
-                    }
-                }
-            }
-        }
-       
+        }       
         stage('Docker Image Build') {
             steps {
             sh '''
@@ -63,7 +48,19 @@ pipeline {
                 }
             }
         }
-		
+	stage('Aws Ecr Repo Creation') {
+            steps {
+                dir("ecr/") {
+                    script {
+                        sh 'pwd'
+                        sh 'terraform init'
+                        sh 'terraform plan'
+                        sh 'terraform apply --auto-approve'
+                           
+                    }
+                }
+            }
+        }	
         stage('Scanning & Pushing Docker Image into Aws Repo') {
             steps {
                 script {
@@ -76,7 +73,6 @@ pipeline {
                 }
             }
         }
-       
         stage('Deploy Aws Ecr image into Aws Ecs') {
             steps {
                 dir("ecs/") {
@@ -91,6 +87,5 @@ pipeline {
                 }
             }
         }
-       
     }  
     }
