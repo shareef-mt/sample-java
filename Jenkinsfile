@@ -34,20 +34,16 @@ pipeline {
             steps {
                 sh 'mvn -B -DskipTests clean package -e'
             }
+	}
         stage('Docker Image Build') {
             steps {
-            sh '''
-                    pwd
-                    echo "PATH = ${PATH}"
-                    echo "PATH = ${IMAGE}"
-                '''
                 script {
                     sh 'docker version '
                     docker.build('$IMAGE')
                 }
             }
         }
-	      stage('Aws Ecr Repo Creation') {
+	stage('Aws Ecr Repo Creation') {
             steps {
                 dir("ecr/") {
                     script {
@@ -88,3 +84,4 @@ pipeline {
         }
     }  
     }
+}
