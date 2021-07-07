@@ -1,18 +1,8 @@
 pipeline {
-    environment {
-        VERSION = "latest"
-        PROJECT = "sample-java"
-        IMAGE = "$PROJECT:$VERSION"
-        ECRURL = "https://683294139580.dkr.ecr.us-east-1.amazonaws.com/sample-java"
-        ECRCRED = "ecr:us-east-1:aws_ecr_cred"
-    }
-       
     agent any
     tools {
         maven 'maven'
-	terraform 'terraform'
     }
-	
     stages {
         stage ('Initialize') {
             steps {
@@ -22,75 +12,20 @@ pipeline {
                 '''
             }
         }
-       
         stage('SCM Checkout') {
             steps {
             // Get source code from Gitlab repository
-                checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github_cred', url: 'https://github.com/shareef-mt/sample-java.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/patch-1']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-cred', url: 'https://github.com/shareef242/sample-java.git']]])
             }
         }
-       
+        //stage('SCM Checkout') {
+         //  git branch: 'dev', credentialsId: '39504cb7-8286-4f57-94fe-e2544d0b86a1', 
+          // url: 'https://github.com/shareef242/sample-java.git'
+        //}
         stage('Mvn Package') {
             steps {
                 sh 'mvn -B -DskipTests clean package -e'
             }
-        }
-		
-        stage('Aws Ecr Repo Creation') {
-            steps {
-                dir("ecr/") {
-                    script {
-                        sh 'pwd'
-                        sh 'terraform init'
-                        sh 'terraform plan'
-                        sh 'terraform apply --auto-approve'
-                           
-                    }
-                }
-            }
-        }
-       
-        stage('Docker Image Build') {
-            steps {
-            sh '''
-                    pwd
-                    echo "PATH = ${PATH}"
-                    echo "PATH = ${IMAGE}"
-                '''
-                script {
-                    sh 'docker version '
-                    docker.build('$IMAGE')
-                }
-            }
-        }
-		
-        stage('Scanning & Pushing Docker Image into Aws Repo') {
-            steps {
-                script {
-                    docker.withRegistry(ECRURL, ECRCRED)
-                        {
-                            sh 'aws ecr put-image-scanning-configuration --repository-name sample-java --image-scanning-configuration scanOnPush=true --region us-east-1'
-                            docker.image(IMAGE).push()
-                 
-                        }
-                }
-            }
-        }
-       
-        stage('Deploy Aws Ecr image into Aws Ecs') {
-            steps {
-                dir("ecs/") {
-                    script {
-                        sh '''
-                            terraform init
-                            terraform plan
-                            terraform apply --auto-approve
-       
-                           '''
-                    }
-                }
-            }
-        }
-       
-    }  
+        }      
     }
+}
